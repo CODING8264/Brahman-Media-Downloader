@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "com.brahman.downloader"
         minSdk 26
-        targetSdk 33              // Changed from 34 to 33
+        targetSdk 34              // Changed from 34 to 34
         versionCode 1
         versionName "1.0.0"
         multiDexEnabled true
