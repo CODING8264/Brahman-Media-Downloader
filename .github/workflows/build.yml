@@ -23,8 +23,10 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: 34
-          build-tools: "34.0.0"
+          api-level: 34               # Ensure SDK 34 is installed
+          build-tools: '34.0.0'
+          cmake: false
+          ndk: false
 
       - name: Generate Gradle Wrapper
         run: |
@@ -45,6 +47,13 @@ jobs:
           key: gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: gradle-
 
+      - name: Add Dependencies Fix
+        run: |
+          # Ensure mavenCentral() and junkfood02 libraries are available
+          grep -qxF 'mavenCentral()' app/build.gradle || sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
+          grep -qxF 'implementation "io.github.junkfood02:youtubedl-android:0.13.0"' app/build.gradle || sed -i '/dependencies {/a \ \ \ \ implementation "io.github.junkfood02:youtubedl-android:0.13.0"' app/build.gradle
+          grep -qxF 'implementation "io.github.junkfood02:ffmpeg-android:4.4.LTS"' app/build.gradle || sed -i '/dependencies {/a \ \ \ \ implementation "io.github.junkfood02:ffmpeg-android:4.4.LTS"' app/build.gradle
+
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/brahman.keystore
@@ -56,7 +65,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew clean assembleRelease --no-daemon --stacktrace
         timeout-minutes: 35
 
       - name: Copy APK
