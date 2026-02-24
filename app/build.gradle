@@ -4,12 +4,13 @@ plugins {
 
 android {
     namespace 'com.brahman.downloader'
-    compileSdk 34
+    compileSdk 33                 // Changed from 34 to 33
+    buildToolsVersion "33.0.2"    // Explicitly set Build Tools 33
 
     defaultConfig {
         applicationId "com.brahman.downloader"
         minSdk 26
-        targetSdk 34
+        targetSdk 33              // Changed from 34 to 33
         versionCode 1
         versionName "1.0.0"
         multiDexEnabled true
