@@ -1,33 +1,34 @@
-name: Build Android APK
+name: Android Build
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
-      - name: Install Android SDK
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Generate Gradle Wrapper
+      - name: Create Gradle Wrapper
         run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O gradle.zip
-          unzip -q gradle.zip
+          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
+          unzip -q gradle-8.4-bin.zip
           export PATH=$PWD/gradle-8.4/bin:$PATH
-          gradle wrapper --gradle-version 8.4 --distribution-type=bin
+          gradle wrapper --gradle-version 8.4
           chmod +x gradlew
 
       - name: Build Debug APK
@@ -36,5 +37,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
-          name: app-debug-apk
+          name: debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
