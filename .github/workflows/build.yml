@@ -23,20 +23,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: 34               # Ensure SDK 34 is installed
+          api-level: 34
           build-tools: '34.0.0'
-          cmake: false
-          ndk: false
 
-      - name: Generate Gradle Wrapper
-        run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O gradle.zip
-          unzip -q gradle.zip
-          export PATH=$PWD/gradle-8.4/bin:$PATH
-          gradle wrapper --gradle-version=8.4 --distribution-type=bin
-          chmod +x gradlew
-          echo "✅ gradlew created"
-          ls -la gradlew
+      - name: Ensure Gradle Wrapper
+        run: chmod +x gradlew
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -46,13 +37,6 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: gradle-
-
-      - name: Add Dependencies Fix
-        run: |
-          # Ensure mavenCentral() and junkfood02 libraries are available
-          grep -qxF 'mavenCentral()' app/build.gradle || sed -i '/repositories {/a \ \ \ \ mavenCentral()' app/build.gradle
-          grep -qxF 'implementation "io.github.junkfood02:youtubedl-android:0.13.0"' app/build.gradle || sed -i '/dependencies {/a \ \ \ \ implementation "io.github.junkfood02:youtubedl-android:0.13.0"' app/build.gradle
-          grep -qxF 'implementation "io.github.junkfood02:ffmpeg-android:4.4.LTS"' app/build.gradle || sed -i '/dependencies {/a \ \ \ \ implementation "io.github.junkfood02:ffmpeg-android:4.4.LTS"' app/build.gradle
 
       - name: Decode Keystore
         run: |
@@ -64,13 +48,11 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          ./gradlew clean assembleRelease --no-daemon --stacktrace
+        run: ./gradlew clean assembleRelease --no-daemon --stacktrace
         timeout-minutes: 35
 
       - name: Copy APK
         run: |
-          find . -name "*.apk" -type f
           cp app/build/outputs/apk/release/app-release.apk BrahmanDownloader.apk
           ls -lh BrahmanDownloader.apk
 
